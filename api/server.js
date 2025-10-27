@@ -8,6 +8,7 @@ import mongoMock from '../mocks/mongoMock.js';
 import redisMock from '../mocks/redisMock.js';
 import opensearchMock from '../mocks/opensearchMock.js';
 import jsonBodyParser from '../lib/middleware/jsonBodyParser.js';
+import requestLogger from '../lib/middleware/requestLogger.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -43,15 +44,32 @@ async function loadRouters(rootRouter) {
 }
 
 function registerHealthRoute(rootRouter) {
+  const buildStatus = () => ({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    services: {
+      mongo: mongoMock.connected,
+      redis: redisMock.connected,
+      opensearch: opensearchMock.connected
+    }
+  });
+
   rootRouter.get('/health', async (ctx) => {
+    ctx.body = buildStatus();
+  });
+
+  rootRouter.get('/', async (ctx) => {
+    ctx.body = {
+      ...buildStatus(),
+      message: 'Koa Vercel POC API'
+    };
+  });
+
+  rootRouter.get('/ping', async (ctx) => {
     ctx.body = {
       status: 'ok',
-      timestamp: new Date().toISOString(),
-      services: {
-        mongo: mongoMock.connected,
-        redis: redisMock.connected,
-        opensearch: opensearchMock.connected
-      }
+      message: 'pong',
+      timestamp: new Date().toISOString()
     };
   });
 }
@@ -97,6 +115,7 @@ export async function createApp() {
   const app = new Koa();
   applyErrorHandling(app);
   app.use(jsonBodyParser);
+  app.use(requestLogger);
 
   const rootRouter = new Router();
   registerHealthRoute(rootRouter);
