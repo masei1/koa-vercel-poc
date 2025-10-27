@@ -1,5 +1,4 @@
 import request from 'supertest';
-import Koa from 'koa';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { glob } from 'glob';
@@ -14,10 +13,8 @@ describe('Server Integration', () => {
   const __dirname = dirname(fileURLToPath(import.meta.url));
 
   beforeEach(async () => {
-    // Import server fresh for each test to avoid state persistence
-    const { default: serverCallback } = await import('../../api/server.js');
-    app = new Koa();
-    app.use(serverCallback);
+    const serverModule = await import('../../api/server.js');
+    app = await serverModule.createApp();
   });
 
   describe('Service Initialization', () => {

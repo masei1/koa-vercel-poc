@@ -10,6 +10,7 @@ class MongoMock {
   // Mock connection method
   async connect(uri) {
     console.log(`[MongoDB Mock] Connecting to ${uri}`);
+    this.collections = new Map();
     this.connected = true;
     return this;
   }

@@ -3,15 +3,18 @@ import Koa from 'koa';
 import Router from '@koa/router';
 import usersRouter from '../../lib/v1/users/router.js';
 import mongoMock from '../../mocks/mongoMock.js';
+import jsonBodyParser from '../../lib/middleware/jsonBodyParser.js';
 
 describe('Users Router', () => {
   let app;
 
   beforeEach(async () => {
     app = new Koa();
+    app.use(jsonBodyParser);
     const router = new Router();
     router.use(usersRouter.routes());
     app.use(router.routes());
+    app.use(router.allowedMethods());
 
     // Initialize mock
     await mongoMock.connect('mongodb://mock:27017/test');

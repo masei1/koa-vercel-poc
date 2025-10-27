@@ -1,3 +1,9 @@
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  ListObjectsV2Command,
+  PutObjectCommand
+} from '@aws-sdk/client-s3';
 import s3Mock from '../../mocks/s3Mock.js';
 
 describe('S3 Mock', () => {
@@ -8,12 +14,12 @@ describe('S3 Mock', () => {
 
   describe('Upload Operations', () => {
     it('should upload a file', async () => {
-      const result = await s3Mock.upload({
+      const result = await s3Mock.send(new PutObjectCommand({
         Bucket: testBucket,
         Key: testKey,
         Body: testContent,
         ContentType: testContentType
-      }).promise();
+      }));
 
       expect(result).toHaveProperty('Location');
       expect(result.Location).toContain(testBucket);
@@ -26,19 +32,19 @@ describe('S3 Mock', () => {
 
   describe('Get Operations', () => {
     beforeEach(async () => {
-      await s3Mock.upload({
+      await s3Mock.send(new PutObjectCommand({
         Bucket: testBucket,
         Key: testKey,
         Body: testContent,
         ContentType: testContentType
-      }).promise();
+      }));
     });
 
     it('should get object metadata', async () => {
-      const result = await s3Mock.getObject({
+      const result = await s3Mock.send(new GetObjectCommand({
         Bucket: testBucket,
         Key: testKey
-      }).promise();
+      }));
 
       expect(result).toHaveProperty('ContentType', testContentType);
       expect(result).toHaveProperty('Body');
@@ -48,37 +54,37 @@ describe('S3 Mock', () => {
     });
 
     it('should handle non-existent objects', async () => {
-      await expect(s3Mock.getObject({
+      await expect(s3Mock.send(new GetObjectCommand({
         Bucket: testBucket,
         Key: 'non-existent.txt'
-      }).promise()).rejects.toThrow('NoSuchKey');
+      }))).rejects.toThrow('NoSuchKey');
     });
   });
 
   describe('Delete Operations', () => {
     beforeEach(async () => {
-      await s3Mock.upload({
+      await s3Mock.send(new PutObjectCommand({
         Bucket: testBucket,
         Key: testKey,
         Body: testContent,
         ContentType: testContentType
-      }).promise();
+      }));
     });
 
     it('should delete an object', async () => {
-      const result = await s3Mock.deleteObject({
+      const result = await s3Mock.send(new DeleteObjectCommand({
         Bucket: testBucket,
         Key: testKey
-      }).promise();
+      }));
 
       expect(result).toHaveProperty('DeleteMarker', true);
       expect(result).toHaveProperty('VersionId');
 
       // Verify deletion
-      await expect(s3Mock.getObject({
+      await expect(s3Mock.send(new GetObjectCommand({
         Bucket: testBucket,
         Key: testKey
-      }).promise()).rejects.toThrow('NoSuchKey');
+      }))).rejects.toThrow('NoSuchKey');
     });
   });
 
@@ -86,32 +92,32 @@ describe('S3 Mock', () => {
     beforeEach(async () => {
       // Upload multiple test files
       await Promise.all([
-        s3Mock.upload({
+        s3Mock.send(new PutObjectCommand({
           Bucket: testBucket,
           Key: 'folder1/file1.txt',
           Body: 'content1',
           ContentType: 'text/plain'
-        }).promise(),
-        s3Mock.upload({
+        })),
+        s3Mock.send(new PutObjectCommand({
           Bucket: testBucket,
           Key: 'folder1/file2.txt',
           Body: 'content2',
           ContentType: 'text/plain'
-        }).promise(),
-        s3Mock.upload({
+        })),
+        s3Mock.send(new PutObjectCommand({
           Bucket: testBucket,
           Key: 'folder2/file3.txt',
           Body: 'content3',
           ContentType: 'text/plain'
-        }).promise()
+        }))
       ]);
     });
 
     it('should list objects with prefix', async () => {
-      const result = await s3Mock.listObjects({
+      const result = await s3Mock.send(new ListObjectsV2Command({
         Bucket: testBucket,
         Prefix: 'folder1/'
-      }).promise();
+      }));
 
       expect(result.Contents).toHaveLength(2);
       expect(result.Contents[0]).toHaveProperty('Key');

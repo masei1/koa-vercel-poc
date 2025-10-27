@@ -52,7 +52,15 @@ class OpenSearchMock {
         );
       } else if (body.query.term) {
         const [field, value] = Object.entries(body.query.term)[0];
-        results = documents.filter(doc => doc[field] === value);
+        results = documents.filter(doc => {
+          const docValue = doc[field];
+
+          if (Array.isArray(docValue)) {
+            return docValue.includes(value);
+          }
+
+          return docValue === value;
+        });
       }
     }
 
