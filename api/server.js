@@ -1,7 +1,7 @@
 import Koa from 'koa';
 import Router from '@koa/router';
 import { glob } from 'glob';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 import { dirname, join } from 'path';
 
 import mongoMock from '../mocks/mongoMock.js';
@@ -110,6 +110,18 @@ export async function createApp() {
 }
 
 const appInstance = await createApp();
+
+const isDirectExecution =
+  Boolean(process.argv[1]) &&
+  import.meta.url === pathToFileURL(process.argv[1]).href;
+
+if (isDirectExecution) {
+  const port = process.env.PORT || 3000;
+  // Keep the API running when invoked via `node api/server.js`
+  appInstance.listen(port, () => {
+    console.log(`API server listening on http://localhost:${port}`);
+  });
+}
 
 export const app = appInstance;
 
