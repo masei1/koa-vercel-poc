@@ -18,7 +18,7 @@ A proof of concept demonstrating how to run a Koa.js API on Vercel with mocked c
 
 ## Project Structure
 
-\`\`\`
+```
 koa-vercel-poc/
 ├── api/
 │   └── server.js              # Main entrypoint for Vercel
@@ -44,7 +44,7 @@ koa-vercel-poc/
 ├── package.json
 ├── vercel.json
 └── README.md
-\`\`\`
+```
 
 ## Getting Started
 
@@ -57,17 +57,20 @@ koa-vercel-poc/
 ### Local Development Setup
 
 1. Clone the repository:
+
    ```bash
-   git clone https://github.com/yourusername/koa-vercel-poc.git
+   git clone https://github.com/masei1/koa-vercel-poc.git
    cd koa-vercel-poc
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    ```
 
 3. Link project with Vercel:
+
    ```bash
    # First time setup
    vercel login                    # Login to your Vercel account
@@ -76,14 +79,15 @@ koa-vercel-poc/
    ```
 
 4. Run development server:
+
    ```bash
    # Start the development server with Vercel
    vercel dev                      # Run with Vercel development server
-   
+
    # For local development with hot reload
    vercel dev --listen 3000       # Specify port
    vercel dev --debug             # Enable debug logging
-   
+
    # Test production build locally
    vercel build                   # Build for production
    vercel start                   # Test production build
@@ -92,15 +96,16 @@ koa-vercel-poc/
    The API will be available at `http://localhost:3000`
 
 5. Working with local changes:
+
    ```bash
    # Deploy local changes to preview
    vercel                         # Deploy current directory
-   
+
    # Deploy with specific configuration
    vercel --env ENV=dev           # Set environment variable
    vercel --confirm              # Skip confirmation step
    vercel --prod                 # Deploy to production
-   
+
    # Other useful commands
    vercel ls                     # List deployments
    vercel logs                   # View deployment logs
@@ -110,16 +115,19 @@ koa-vercel-poc/
 ### Running Tests
 
 1. Run all tests once:
+
    ```bash
    npm test
    ```
 
 2. Run tests in watch mode (for development):
+
    ```bash
    npm run test:watch
    ```
 
 3. Generate test coverage report:
+
    ```bash
    npm run test:coverage
    ```
@@ -129,21 +137,25 @@ koa-vercel-poc/
 ### Deployment to Vercel
 
 1. Login to Vercel (first time only):
+
    ```bash
    vercel login
    ```
 
 2. Deploy to preview environment:
+
    ```bash
    vercel
    ```
 
 3. Deploy to production:
+
    ```bash
    vercel --prod
    ```
 
 4. Set environment variables (if needed):
+
    ```bash
    # Set a single variable
    vercel env add VARIABLE_NAME
@@ -185,68 +197,80 @@ vercel rollback            # Rollback to previous version
 ## API Endpoints
 
 ### Health Check
-- \`GET /health\` - Check API and mock service status
+
+- `GET /health` - Check API and mock service status
 
 ### Users
-- \`GET /v1/users\` - List all users
-- \`GET /v1/users/:id\` - Get user by ID
-- \`POST /v1/users\` - Create new user
-- \`PUT /v1/users/:id\` - Update user
-- \`DELETE /v1/users/:id\` - Delete user
+
+- `GET /v1/users` - List all users
+- `GET /v1/users/:id` - Get user by ID
+- `POST /v1/users` - Create new user
+- `PUT /v1/users/:id` - Update user
+- `DELETE /v1/users/:id` - Delete user
 
 ### User Devices
-- \`GET /v1/users/:userId/devices\` - List user's devices
-- \`GET /v1/users/:userId/devices/:deviceId\` - Get device details
-- \`POST /v1/users/:userId/devices\` - Register new device
-- \`PUT /v1/users/:userId/devices/:deviceId\` - Update device
-- \`DELETE /v1/users/:userId/devices/:deviceId\` - Delete device
+
+- `GET /v1/users/:userId/devices` - List user's devices
+- `GET /v1/users/:userId/devices/:deviceId` - Get device details
+- `POST /v1/users/:userId/devices` - Register new device
+- `PUT /v1/users/:userId/devices/:deviceId` - Update device
+- `DELETE /v1/users/:userId/devices/:deviceId` - Delete device
 
 ### Search
-- \`GET /v1/search?q=query\` - Search content
-- \`POST /v1/search/:index/document\` - Index document
-- \`DELETE /v1/search/:index/document/:id\` - Delete document
+
+- `GET /v1/search?q=query` - Search content
+- `POST /v1/search/:index/document` - Index document
+- `DELETE /v1/search/:index/document/:id` - Delete document
 
 ### Upload
-- \`POST /v1/upload\` - Upload file
-- \`GET /v1/upload/:key\` - Get file metadata
-- \`DELETE /v1/upload/:key\` - Delete file
-- \`GET /v1/upload\` - List uploads
+
+- `POST /v1/upload` - Upload file
+- `GET /v1/upload/:key` - Get file metadata
+- `DELETE /v1/upload/:key` - Delete file
+- `GET /v1/upload` - List uploads
 
 ### Queue
-- \`POST /v1/queue/send\` - Send message
-- \`GET /v1/queue/receive\` - Receive messages
-- \`DELETE /v1/queue/message\` - Delete message
-- \`GET /v1/queue/history\` - View message history
-- \`DELETE /v1/queue/history\` - Clear message history
+
+- `POST /v1/queue/send` - Send message
+- `GET /v1/queue/receive` - Receive messages
+- `DELETE /v1/queue/message` - Delete message
+- `GET /v1/queue/history` - View message history
+- `DELETE /v1/queue/history` - Clear message history
 
 ## Mock Services
 
 ### MongoDB Mock
+
 - Simulates basic CRUD operations
 - In-memory storage with Mongoose-like interface
 - Supports collections, queries, and document operations
 
 ### Redis Mock
+
 - In-memory key-value store
 - Supports get, set, del operations
 - Optional key expiration
 
 ### OpenSearch Mock
+
 - Simulates search and indexing operations
 - Supports basic query types
 - Returns realistic search responses
 
 ### API Gateway Mock
+
 - Simulates external API requests
 - Logs all requests for debugging
 - Returns configurable responses
 
 ### S3 Mock
+
 - Simulates file upload operations
 - Generates mock S3 URLs
 - Tracks file metadata
 
 ### SQS Mock
+
 - Simulates message queue operations
 - Maintains message history
 - Supports send, receive, and delete operations
@@ -256,30 +280,28 @@ vercel rollback            # Rollback to previous version
 To convert mock services to real cloud services:
 
 1. Install required packages:
-   \`\`\`bash
-   npm install mongoose redis @opensearch-project/opensearch aws-sdk
-   \`\`\`
+   `bash
+npm install mongoose redis @opensearch-project/opensearch @aws-sdk/client-s3 @aws-sdk/client-sqs
+`
 
-2. Create configuration file (\`.env\`):
-   \`\`\`
-   MONGODB_URI=mongodb://your-mongo-uri
-   REDIS_URL=redis://your-redis-url
-   OPENSEARCH_NODE=https://your-opensearch-endpoint
-   AWS_REGION=your-aws-region
-   AWS_ACCESS_KEY_ID=your-access-key
-   AWS_SECRET_ACCESS_KEY=your-secret-key
-   S3_BUCKET=your-bucket-name
-   SQS_QUEUE_URL=your-queue-url
-   \`\`\`
+2. Create configuration file (`.env`):
+   `MONGODB_URI=mongodb://your-mongo-uri
+REDIS_URL=redis://your-redis-url
+OPENSEARCH_NODE=https://your-opensearch-endpoint
+AWS_REGION=your-aws-region
+AWS_ACCESS_KEY_ID=your-access-key
+AWS_SECRET_ACCESS_KEY=your-secret-key
+S3_BUCKET=your-bucket-name
+SQS_QUEUE_URL=your-queue-url`
 
-3. Replace mock imports with real service clients in \`api/server.js\`
+3. Replace mock imports with real service clients in `api/server.js`
 4. Update environment variables in Vercel project settings
 5. Deploy updated version to Vercel
 
 ## Development
 
-- Use \`vercel dev\` for local development
-- All routes are automatically loaded from \`lib/v1/**/router.js\`
+- Use `vercel dev` for local development
+- All routes are automatically loaded from `lib/v1/\*\*/router.js`
 - Mock services log operations to console for debugging
 - Add new routes by creating router files in the appropriate directories
 
@@ -290,11 +312,13 @@ The project includes comprehensive test coverage using Jest:
 ### Running Tests
 
 - Run all tests:
+
   ```bash
   npm test
   ```
 
 - Run tests in watch mode:
+
   ```bash
   npm run test:watch
   ```
@@ -313,6 +337,7 @@ The project includes comprehensive test coverage using Jest:
 ### Test Coverage
 
 Tests cover:
+
 - All mock service implementations (MongoDB, Redis, OpenSearch, etc.)
 - API endpoints and route handlers
 - Server initialization and configuration
@@ -326,7 +351,7 @@ The project is configured for immediate deployment on Vercel:
 1. Push to GitHub
 2. Connect repository to Vercel
 3. Vercel will automatically detect the configuration
-4. Deploy with \`vercel --prod\`
+4. Deploy with `vercel --prod`
 
 ## License
 
