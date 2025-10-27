@@ -51,8 +51,8 @@ koa-vercel-poc/
 ### Prerequisites
 
 - Node.js >= 18
-- yarn >= 8
-- Vercel CLI (`yarn i -g vercel`)
+- Yarn >= 1.22
+- Vercel CLI (`yarn global add vercel`)
 
 ### Local Development Setup
 
@@ -123,13 +123,13 @@ koa-vercel-poc/
 2. Run tests in watch mode (for development):
 
    ```bash
-   yarn run test:watch
+   yarn test:watch
    ```
 
 3. Generate test coverage report:
 
    ```bash
-   yarn run test:coverage
+   yarn test:coverage
    ```
 
    Coverage report will be available in `coverage/` directory
@@ -183,8 +183,8 @@ vercel inspect               # Inspect deployment
 
 # Testing
 yarn test                      # Run all tests
-yarn run test:watch           # Run tests in watch mode
-yarn run test:coverage        # Generate coverage report
+yarn test:watch               # Run tests in watch mode
+yarn test:coverage            # Generate coverage report
 
 # Deployment
 vercel                       # Deploy to preview URL
@@ -285,19 +285,23 @@ vercel rollback            # Rollback to previous version
 To convert mock services to real cloud services:
 
 1. Install required packages:
-   `bash
-yarn install mongoose redis @opensearch-project/opensearch @aws-sdk/client-s3 @aws-sdk/client-sqs
-`
+
+   ```bash
+   yarn add mongoose redis @opensearch-project/opensearch @aws-sdk/client-s3 @aws-sdk/client-sqs
+   ```
 
 2. Create configuration file (`.env`):
-   `MONGODB_URI=mongodb://your-mongo-uri
-REDIS_URL=redis://your-redis-url
-OPENSEARCH_NODE=https://your-opensearch-endpoint
-AWS_REGION=your-aws-region
-AWS_ACCESS_KEY_ID=your-access-key
-AWS_SECRET_ACCESS_KEY=your-secret-key
-S3_BUCKET=your-bucket-name
-SQS_QUEUE_URL=your-queue-url`
+
+   ```bash
+   MONGODB_URI=mongodb://your-mongo-uri
+   REDIS_URL=redis://your-redis-url
+   OPENSEARCH_NODE=https://your-opensearch-endpoint
+   AWS_REGION=your-aws-region
+   AWS_ACCESS_KEY_ID=your-access-key
+   AWS_SECRET_ACCESS_KEY=your-secret-key
+   S3_BUCKET=your-bucket-name
+   SQS_QUEUE_URL=your-queue-url
+   ```
 
 3. Replace mock imports with real service clients in `api/server.js`
 4. Update environment variables in Vercel project settings
@@ -325,12 +329,12 @@ The project includes comprehensive test coverage using Jest:
 - Run tests in watch mode:
 
   ```bash
-  yarn run test:watch
+  yarn test:watch
   ```
 
 - Generate coverage report:
   ```bash
-  yarn run test:coverage
+  yarn test:coverage
   ```
 
 ### Test Structure
