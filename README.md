@@ -51,8 +51,8 @@ koa-vercel-poc/
 ### Prerequisites
 
 - Node.js >= 18
-- npm >= 8
-- Vercel CLI (`npm i -g vercel`)
+- yarn >= 8
+- Vercel CLI (`yarn i -g vercel`)
 
 ### Local Development Setup
 
@@ -66,7 +66,7 @@ koa-vercel-poc/
 2. Install dependencies:
 
    ```bash
-   npm install
+   yarn install
    ```
 
 3. Link project with Vercel:
@@ -117,19 +117,19 @@ koa-vercel-poc/
 1. Run all tests once:
 
    ```bash
-   npm test
+   yarn test
    ```
 
 2. Run tests in watch mode (for development):
 
    ```bash
-   npm run test:watch
+   yarn run test:watch
    ```
 
 3. Generate test coverage report:
 
    ```bash
-   npm run test:coverage
+   yarn run test:coverage
    ```
 
    Coverage report will be available in `coverage/` directory
@@ -182,9 +182,9 @@ vercel logs                   # View deployment logs
 vercel inspect               # Inspect deployment
 
 # Testing
-npm test                      # Run all tests
-npm run test:watch           # Run tests in watch mode
-npm run test:coverage        # Generate coverage report
+yarn test                      # Run all tests
+yarn run test:watch           # Run tests in watch mode
+yarn run test:coverage        # Generate coverage report
 
 # Deployment
 vercel                       # Deploy to preview URL
@@ -199,6 +199,11 @@ vercel rollback            # Rollback to previous version
 ### Health Check
 
 - `GET /health` - Check API and mock service status
+
+### Documentation & Journeys
+
+- `docs/curl-journeys.md` - Copy-pasteable cURL walkthroughs covering the full API journey
+- `journey.sh` - Executable script that automates the same journey with error handling (requires the API to be running locally)
 
 ### Users
 
@@ -281,7 +286,7 @@ To convert mock services to real cloud services:
 
 1. Install required packages:
    `bash
-npm install mongoose redis @opensearch-project/opensearch @aws-sdk/client-s3 @aws-sdk/client-sqs
+yarn install mongoose redis @opensearch-project/opensearch @aws-sdk/client-s3 @aws-sdk/client-sqs
 `
 
 2. Create configuration file (`.env`):
@@ -314,18 +319,18 @@ The project includes comprehensive test coverage using Jest:
 - Run all tests:
 
   ```bash
-  npm test
+  yarn test
   ```
 
 - Run tests in watch mode:
 
   ```bash
-  npm run test:watch
+  yarn run test:watch
   ```
 
 - Generate coverage report:
   ```bash
-  npm run test:coverage
+  yarn run test:coverage
   ```
 
 ### Test Structure
