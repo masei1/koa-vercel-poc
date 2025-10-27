@@ -61,26 +61,19 @@ perform_request() {
   local method=$1
   local url=$2
   local data="${3-}"
-  local tmp="$TMP_DIR/body.$$.$RANDOM"
+  local tmp
+  tmp="$(mktemp "$TMP_DIR/body.XXXXXX")"
   local status curl_exit
 
+  local args=(-sS -o "$tmp" -w "%{http_code}" -X "$method" "$url")
   if [[ -n $data ]]; then
-    set +e
-    status=$(curl -sS -o "$tmp" -w "%{http_code}" \
-      -H "Content-Type: application/json" \
-      -X "$method" \
-      "$url" \
-      -d "$data")
-    curl_exit=$?
-    set -e
-  else
-    set +e
-    status=$(curl -sS -o "$tmp" -w "%{http_code}" \
-      -X "$method" \
-      "$url")
-    curl_exit=$?
-    set -e
+    args+=(-H "Content-Type: application/json" -d "$data")
   fi
+
+  set +e
+  status=$(curl "${args[@]}")
+  curl_exit=$?
+  set -e
 
   if [[ $curl_exit -ne 0 ]]; then
     rm -f "$tmp"
@@ -268,6 +261,6 @@ JSON
 }
 
 trap 'on_error $? $LINENO' ERR
-trap cleanup EXIT
+trap 'cleanup' EXIT INT TERM
 
 main "$@"
