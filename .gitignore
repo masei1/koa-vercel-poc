@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Vercel
+.vercel
+
+# Environment variables
+.env*
+
+# OS files
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
