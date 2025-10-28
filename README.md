@@ -242,6 +242,10 @@ vercel rollback            # Rollback to previous version
 - `GET /v1/queue/history` - View message history
 - `DELETE /v1/queue/history` - Clear message history
 
+### Places Map
+
+- `GET /v1/places/map?bbox=west,south,east,north&zoom=<number>` - Returns clusters, markers, and polygons based on zoom level; supports optional `delayMs` (0-60000) to simulate longer processing times and test caching behavior
+
 ## Mock Services
 
 ### MongoDB Mock

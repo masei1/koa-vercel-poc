@@ -131,3 +131,23 @@ curl -s -o /dev/null -w "Clear status: %{http_code}\n" \
   "$API_BASE/v1/queue/history" \
   -X DELETE
 ```
+
+## Places Map Examples
+
+```bash
+# 1. Request map data for Northern California (no artificial delay)
+BBOX="-125,32,-114,42"   # west,south,east,north
+curl -s -w "Map baseline: HTTP %{http_code} in %{time_total}s\n" \
+  "$API_BASE/v1/places/map?bbox=$BBOX&zoom=7" \
+  | jq '{total:.data.total, clusters:(.data.clusters|length), markers:(.data.markers|length), polygons:(.data.polygons|length)}'
+
+# 2. Repeat with a 3 second delay to test caching/latency
+curl -s -w "Map delay 3s: HTTP %{http_code} in %{time_total}s\n" \
+  "$API_BASE/v1/places/map?bbox=$BBOX&zoom=7&delayMs=3000" \
+  | jq '{processing:.meta.processingTimeMs}'
+
+# 3. Repeat with a 6 second delay
+curl -s -w "Map delay 6s: HTTP %{http_code} in %{time_total}s\n" \
+  "$API_BASE/v1/places/map?bbox=$BBOX&zoom=7&delayMs=6000" \
+  | jq '{processing:.meta.processingTimeMs}'
+```

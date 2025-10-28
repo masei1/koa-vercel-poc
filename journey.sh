@@ -10,6 +10,7 @@ QUEUE_URL="${QUEUE_URL:-https://mock-sqs.local/queues/demo}"
 CURRENT_STEP=""
 REQUEST_STATUS=""
 REQUEST_BODY=""
+REQUEST_DURATION=""
 ERROR_HANDLED=0
 
 TMP_DIR="$(mktemp -d journey.XXXXXX)"
@@ -57,21 +58,32 @@ urlencode() {
   done
 }
 
+format_duration_ms() {
+  local seconds=$1
+  awk -v t="$seconds" 'BEGIN {
+    if (t == "" || t < 0) {
+      printf "n/a";
+    } else {
+      printf "%.0f", t * 1000;
+    }
+  }'
+}
+
 perform_request() {
   local method=$1
   local url=$2
   local data="${3-}"
   local tmp
   tmp="$(mktemp "$TMP_DIR/body.XXXXXX")"
-  local status curl_exit
+  local status_line curl_exit
 
-  local args=(-sS -o "$tmp" -w "%{http_code}" -X "$method" "$url")
+  local args=(-sS -o "$tmp" -w "%{http_code} %{time_total}" -X "$method" "$url")
   if [[ -n $data ]]; then
     args+=(-H "Content-Type: application/json" -d "$data")
   fi
 
   set +e
-  status=$(curl "${args[@]}")
+  status_line=$(curl "${args[@]}")
   curl_exit=$?
   set -e
 
@@ -80,7 +92,8 @@ perform_request() {
     abort "Failed to reach $url (curl exit code: $curl_exit). Is the API running at $API_BASE?"
   fi
 
-  REQUEST_STATUS=$status
+  read -r REQUEST_STATUS REQUEST_DURATION <<<"$status_line"
+  REQUEST_DURATION=${REQUEST_DURATION:-0}
   if [[ -s $tmp ]]; then
     REQUEST_BODY=$(<"$tmp")
   else
@@ -108,6 +121,7 @@ main() {
   set_step "Checking prerequisites"
   ensure_command curl
   ensure_command jq
+  ensure_command awk
   echo "API base URL: $API_BASE"
   echo "Queue URL: $QUEUE_URL"
 
@@ -257,6 +271,27 @@ JSON
   perform_request DELETE "$API_BASE/v1/queue/history"
   assert_status 204
   echo "Cleared queue history"
+
+  local MAP_QUERY="bbox=-125,32,-114,42&zoom=7"
+  set_step "Requesting map data (baseline)"
+  perform_request GET "$API_BASE/v1/places/map?$MAP_QUERY"
+  assert_status 200
+  local MAP_BASE_DURATION_MS
+  MAP_BASE_DURATION_MS=$(format_duration_ms "$REQUEST_DURATION")
+  echo "Baseline map response time: ${MAP_BASE_DURATION_MS}ms"
+  echo "$REQUEST_BODY" | jq '{summary:{clusters:(.data.clusters | length), markers:(.data.markers | length), polygons:(.data.polygons | length), total:.data.total}, cacheKey:.meta.cacheKey}'
+
+  local delay_scenarios=(1000 4000)
+  local delay
+  for delay in "${delay_scenarios[@]}"; do
+    set_step "Requesting map data with artificial delay ${delay}ms"
+    perform_request GET "$API_BASE/v1/places/map?$MAP_QUERY&delayMs=$delay"
+    assert_status 200
+    local MAP_DELAY_DURATION_MS
+    MAP_DELAY_DURATION_MS=$(format_duration_ms "$REQUEST_DURATION")
+    echo "Observed response time: ${MAP_DELAY_DURATION_MS}ms (requested delay ${delay}ms)"
+    echo "$REQUEST_BODY" | jq '{processingTime:.meta.processingTimeMs, generatedAt:.meta.generatedAt}'
+  done
 
   echo ""
   echo "✅ Journey completed successfully."
