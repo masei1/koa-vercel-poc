@@ -273,25 +273,67 @@ JSON
   echo "Cleared queue history"
 
   local MAP_QUERY="bbox=-125,32,-114,42&zoom=7"
-  set_step "Requesting map data (baseline)"
-  perform_request GET "$API_BASE/v1/places/map?$MAP_QUERY"
-  assert_status 200
-  local MAP_BASE_DURATION_MS
-  MAP_BASE_DURATION_MS=$(format_duration_ms "$REQUEST_DURATION")
-  echo "Baseline map response time: ${MAP_BASE_DURATION_MS}ms"
-  echo "$REQUEST_BODY" | jq '{summary:{clusters:(.data.clusters | length), markers:(.data.markers | length), polygons:(.data.polygons | length), total:.data.total}, cacheKey:.meta.cacheKey}'
+  local MAP_TEST_DELAY_MS="${JOURNEY_MAP_DELAY_MS:-3000}"
+  local MAP_TEST_ITERATIONS="${JOURNEY_MAP_ITERATIONS:-5}"
+  local MAP_BUFFER_MS="${JOURNEY_MAP_BUFFER_MS:-500}"
 
-  local delay_scenarios=(1000 4000)
-  local delay
-  for delay in "${delay_scenarios[@]}"; do
-    set_step "Requesting map data with artificial delay ${delay}ms"
-    perform_request GET "$API_BASE/v1/places/map?$MAP_QUERY&delayMs=$delay"
+  if [[ ! $MAP_TEST_DELAY_MS =~ ^[0-9]+$ ]]; then
+    abort "Invalid JOURNEY_MAP_DELAY_MS value '$MAP_TEST_DELAY_MS'; must be an integer."
+  fi
+  if [[ ! $MAP_TEST_ITERATIONS =~ ^[0-9]+$ ]]; then
+    abort "Invalid JOURNEY_MAP_ITERATIONS value '$MAP_TEST_ITERATIONS'; must be an integer."
+  fi
+  if [[ ! $MAP_BUFFER_MS =~ ^[0-9]+$ ]]; then
+    abort "Invalid JOURNEY_MAP_BUFFER_MS value '$MAP_BUFFER_MS'; must be an integer."
+  fi
+
+  if (( MAP_TEST_ITERATIONS <= 0 )); then
+    abort "JOURNEY_MAP_ITERATIONS must be greater than zero."
+  fi
+
+  local MAP_SUCCESS_THRESHOLD=$((MAP_TEST_DELAY_MS - MAP_BUFFER_MS))
+  if (( MAP_SUCCESS_THRESHOLD < 0 )); then
+    MAP_SUCCESS_THRESHOLD=0
+  fi
+
+  set_step "Evaluating map caching with ${MAP_TEST_ITERATIONS} requests @ ${MAP_TEST_DELAY_MS}ms delay"
+  local durations=()
+  local fastest_ms=999999
+  local faster_hit=0
+  local attempt
+
+  for ((attempt = 1; attempt <= MAP_TEST_ITERATIONS; attempt++)); do
+    echo "Attempt $attempt:"
+    perform_request GET "$API_BASE/v1/places/map?$MAP_QUERY&delayMs=$MAP_TEST_DELAY_MS"
     assert_status 200
-    local MAP_DELAY_DURATION_MS
-    MAP_DELAY_DURATION_MS=$(format_duration_ms "$REQUEST_DURATION")
-    echo "Observed response time: ${MAP_DELAY_DURATION_MS}ms (requested delay ${delay}ms)"
-    echo "$REQUEST_BODY" | jq '{processingTime:.meta.processingTimeMs, generatedAt:.meta.generatedAt}'
+    local duration_ms
+    duration_ms=$(format_duration_ms "$REQUEST_DURATION")
+    if [[ ! $duration_ms =~ ^[0-9]+$ ]]; then
+      abort "Unable to parse map response time for attempt $attempt (got '$duration_ms')."
+    fi
+    durations+=("$duration_ms")
+    echo "  Response time: ${duration_ms}ms (threshold ${MAP_SUCCESS_THRESHOLD}ms)"
+    echo "$REQUEST_BODY" | jq '{cacheKey:.meta.cacheKey, processingTimeMs:.meta.processingTimeMs, generatedAt:.meta.generatedAt}'
+    if (( duration_ms < fastest_ms )); then
+      fastest_ms=$duration_ms
+    fi
+    if (( duration_ms < MAP_SUCCESS_THRESHOLD )); then
+      faster_hit=1
+      echo "  ⚡ Faster-than-delay response detected."
+    fi
   done
+
+  local durations_joined
+  durations_joined=$(printf '%s ' "${durations[@]}")
+  durations_joined=${durations_joined% }
+
+  if (( faster_hit )); then
+    echo "✅ Map caching success: fastest response ${fastest_ms}ms < requested delay ${MAP_TEST_DELAY_MS}ms (threshold ${MAP_SUCCESS_THRESHOLD}ms)."
+    echo "Observed durations (ms): ${durations_joined}"
+  else
+    echo "Observed durations (ms): ${durations_joined}"
+    abort "Map caching check failed: fastest response ${fastest_ms}ms not below threshold ${MAP_SUCCESS_THRESHOLD}ms for delay ${MAP_TEST_DELAY_MS}ms."
+  fi
 
   echo ""
   echo "✅ Journey completed successfully."
