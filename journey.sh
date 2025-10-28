@@ -203,6 +203,8 @@ main() {
   UPLOAD_KEY=$(echo "$REQUEST_BODY" | jq -r '.key // empty')
   [[ -n $UPLOAD_KEY ]] || abort "Upload key missing from response."
   echo "Uploaded file key: $UPLOAD_KEY"
+  local ENCODED_UPLOAD_KEY
+  ENCODED_UPLOAD_KEY=$(urlencode "$UPLOAD_KEY")
 
   set_step "Listing uploads"
   perform_request GET "$API_BASE/v1/upload?prefix=uploads/"
@@ -210,12 +212,12 @@ main() {
   echo "$REQUEST_BODY" | jq '.files'
 
   set_step "Fetching upload metadata"
-  perform_request GET "$API_BASE/v1/upload/$UPLOAD_KEY"
+  perform_request GET "$API_BASE/v1/upload/$ENCODED_UPLOAD_KEY"
   assert_status 200
   echo "$REQUEST_BODY" | jq
 
   set_step "Deleting upload"
-  perform_request DELETE "$API_BASE/v1/upload/$UPLOAD_KEY"
+  perform_request DELETE "$API_BASE/v1/upload/$ENCODED_UPLOAD_KEY"
   assert_status 200
   echo "$REQUEST_BODY" | jq
 
