@@ -1,11 +1,5 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/server.js",
-      "use": "@vercel/node"
-    }
-  ],
   "functions": {
     "api/server.js": {
       "includeFiles": "{lib,mocks}/**"
